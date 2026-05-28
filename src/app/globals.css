@@ -1,26 +1,374 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Design tokens
+   Layout / type / motion: matched to Phisio's Framer values
+   Colors: PT360 brand (navy + cyan)
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Background system */
+  --pt-bg: #f2f2f2;
+  --pt-paper: #ffffff;
+  --pt-tint: #e9eef6;
+
+  /* Brand */
+  --pt-ink: #15326b;
+  --pt-ink-soft: #3a4a6b;
+  --pt-accent: #27a9e1;
+  --pt-accent-hover: #1a8fc0;
+  --pt-accent-tint: #d6e9f5;
+  --pt-dark: #0d3b86;
+  --pt-dark-soft: #15326b;
+  --pt-rule: rgba(21, 50, 107, 0.16);
+  --pt-rule-light: rgba(255, 255, 255, 0.14);
+
+  /* Motion — exact Phisio values from compiled Framer bundle */
+  --pt-ease: cubic-bezier(0.44, 0, 0.56, 1);
+  --pt-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --pt-dur: 0.4s;
+  --pt-fade-distance: 30px;
+  --pt-spring-bounce-dur: 0.6s;
+
+  /* Radii (from Phisio's actual CSS) */
+  --pt-r-card: 10px;
+  --pt-r-pill: 50px;
+  --pt-r-pill-lg: 100px;
+  --pt-r-circle: 100%;
+
+  /* Type scale (exact px from Phisio) */
+  --pt-h1: 64px;
+  --pt-h2: 48px;
+  --pt-h3: 38px;
+  --pt-h4: 26px;
+  --pt-body: 16px;
+  --pt-small: 14px;
+
+  /* Layout — Phisio uses 1300px content max */
+  --pt-shell: 1300px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--pt-bg);
+  --color-foreground: var(--pt-ink);
+
+  --color-paper: var(--pt-paper);
+  --color-tint: var(--pt-tint);
+  --color-accent-tint: var(--pt-accent-tint);
+  --color-ink: var(--pt-ink);
+  --color-ink-soft: var(--pt-ink-soft);
+  --color-accent: var(--pt-accent);
+  --color-accent-hover: var(--pt-accent-hover);
+  --color-dark: var(--pt-dark);
+  --color-dark-soft: var(--pt-dark-soft);
+  --color-rule: var(--pt-rule);
+  --color-rule-light: var(--pt-rule-light);
+
+  /* Legacy aliases (existing components reference these) */
+  --color-brand: var(--pt-accent);
+  --color-brand-hover: var(--pt-accent-hover);
+  --color-forest: var(--pt-dark);
+  --color-forest-deep: var(--pt-dark-soft);
+  --color-charcoal: var(--pt-ink-soft);
+  --color-cream: var(--pt-tint);
+  --color-mint: var(--pt-tint);
+  --color-banner: var(--pt-tint);
+  --color-yellow: var(--pt-accent);
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Open Sauce One', 'Inter', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+html, body {
+  background: var(--pt-bg);
+  color: var(--pt-ink);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: var(--pt-body);
+}
+
+body { min-height: 100dvh; }
+
+::selection { background: var(--pt-accent); color: #fff; }
+
+/* ============================================================
+   Component primitives — Phisio's visual vocabulary
+   ============================================================ */
+
+.pt-shell {
+  max-width: var(--pt-shell);
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 4rem);
+}
+
+/* Section paddings — tightened to match Phisio's actual values */
+.pt-section { padding-block: clamp(3.5rem, 7vw, 7.5rem); }
+.pt-section-tight { padding-block: clamp(1.25rem, 2.5vw, 2.5rem); }
+.pt-section-hero {
+  /* Phisio hero: tight ~30px top, ~40px bottom */
+  padding-block: clamp(1rem, 2.5vw, 2.5rem) clamp(2.5rem, 5vw, 5rem);
+}
+
+/* Display headings — Open Sauce One */
+.pt-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--pt-ink);
+}
+.pt-h1 { font-size: clamp(2.5rem, 5.5vw, 4rem); line-height: 1.08; }
+.pt-h2 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.08; }
+.pt-h3 { font-size: clamp(1.5rem, 2.5vw, 2.375rem); line-height: 1.15; }
+.pt-h4 { font-size: 1.625rem; line-height: 1.2; }
+
+/* Body */
+.pt-body { font-size: 1rem; line-height: 1.6; color: var(--pt-ink-soft); }
+.pt-body-lg { font-size: 1.0625rem; line-height: 1.6; color: var(--pt-ink-soft); }
+.pt-body-sm { font-size: 0.875rem; line-height: 1.55; color: var(--pt-ink-soft); }
+
+/* Eyebrow pill — Phisio's "// Label" pattern */
+.pt-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border: 1px solid var(--pt-rule);
+  border-radius: var(--pt-r-pill);
+  background: transparent;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--pt-ink);
+  line-height: 1;
+}
+.pt-eyebrow::before {
+  content: '//';
+  color: var(--pt-accent);
+  font-weight: 700;
+  margin-right: 4px;
+}
+.pt-eyebrow--dark {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--pt-rule-light);
+  color: #fff;
+}
+
+/* Pill CTA */
+.pt-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  border-radius: var(--pt-r-pill);
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform 0.18s var(--pt-ease), background-color 0.18s var(--pt-ease), color 0.18s var(--pt-ease);
+}
+.pt-pill:active { transform: scale(0.97); }
+.pt-pill--accent { background: var(--pt-accent); color: #fff; }
+.pt-pill--accent:hover { background: var(--pt-accent-hover); }
+.pt-pill--dark { background: var(--pt-ink); color: #fff; }
+.pt-pill--dark:hover { background: var(--pt-dark); }
+.pt-pill--ghost-light { background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.5); }
+.pt-pill--ghost-light:hover { background: #fff; color: var(--pt-ink); }
+.pt-pill::before {
+  content: '//';
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+  margin-right: 2px;
+}
+.pt-pill--no-slashes::before { content: ''; margin: 0; }
+
+/* Card surface */
+.pt-card {
+  border-radius: var(--pt-r-card);
+  background: var(--pt-paper);
+  overflow: hidden;
+}
+
+/* Hoverable card — lifts + softer shadow on hover */
+.pt-card-hover {
+  transition: transform var(--pt-dur) var(--pt-ease), box-shadow var(--pt-dur) var(--pt-ease);
+  will-change: transform;
+}
+.pt-card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px -20px rgba(13, 59, 134, 0.22);
+}
+
+/* Image zoom inside hoverable cards */
+.pt-card-zoom { overflow: hidden; }
+.pt-card-zoom img {
+  transition: transform 700ms var(--pt-ease);
+}
+.pt-card-hover:hover .pt-card-zoom img,
+.group:hover .pt-card-zoom img,
+.pt-zoom-on-hover:hover img {
+  transform: scale(1.05);
+}
+
+/* Play button overlay (used on video cards) */
+.pt-play-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 280ms var(--pt-ease), background-color 280ms var(--pt-ease);
+}
+.group:hover .pt-play-btn,
+.pt-play-btn:hover {
+  transform: scale(1.08);
+  background: #fff;
+}
+.pt-play-btn--lg {
+  width: 92px; height: 92px;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+.group:hover .pt-play-btn--lg,
+.pt-play-btn--lg:hover {
+  background: rgba(255, 255, 255, 0.32);
+  transform: scale(1.08);
+}
+
+/* Hatched header background — diagonal pinstripe */
+.pt-hatched {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0,
+    transparent 6px,
+    rgba(21, 50, 107, 0.04) 6px,
+    rgba(21, 50, 107, 0.04) 7px
+  );
+}
+
+/* Decorative ruler ticks above stats */
+.pt-ruler {
+  height: 14px;
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.45) 0,
+    rgba(255, 255, 255, 0.45) 1px,
+    transparent 1px,
+    transparent 24px
+  );
+  background-position: bottom;
+  background-repeat: repeat-x;
+  background-size: 100% 14px;
+}
+
+/* Hairline divider */
+.pt-hairline { height: 1px; background: var(--pt-rule); }
+.pt-hairline-light { height: 1px; background: var(--pt-rule-light); }
+
+/* Reveal animation — default visible so SSR is never blank. */
+.pt-reveal {
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--pt-dur) var(--pt-ease), transform var(--pt-dur) var(--pt-ease);
+  will-change: opacity, transform;
+}
+.pt-reveal.pt-prep {
+  opacity: 0.001;
+  transform: translateY(var(--pt-fade-distance));
+}
+.pt-reveal--down.pt-prep { transform: translateY(calc(-1 * var(--pt-fade-distance))); }
+.pt-reveal.pt-prep.is-in { opacity: 1; transform: translateY(0); }
+
+/* Spring entry for cards (used on Expertise / Case Study) */
+.pt-spring-up {
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--pt-spring-bounce-dur) var(--pt-ease-spring), transform var(--pt-spring-bounce-dur) var(--pt-ease-spring);
+}
+.pt-spring-up.pt-prep {
+  opacity: 0.001;
+  transform: translateY(24px) scale(0.985);
+}
+.pt-spring-up.pt-prep.is-in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Stagger delays — Phisio's actual values */
+.pt-delay-100 { transition-delay: 0.1s; }
+.pt-delay-200 { transition-delay: 0.2s; }
+.pt-delay-300 { transition-delay: 0.3s; }
+.pt-delay-400 { transition-delay: 0.4s; }
+.pt-delay-500 { transition-delay: 0.5s; }
+.pt-delay-600 { transition-delay: 0.6s; }
+
+/* Hide scrollbar utility (for horizontal scroll strips) */
+.pt-no-scrollbar { scrollbar-width: none; }
+.pt-no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Auto-scroll marquee (used for the Specialties strip)
+   Note: keyframe + utility classes must live above @media blocks so
+   Turbopack's CSS chunk includes them. */
+@keyframes pt-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+.pt-marquee-track {
+  animation: pt-marquee 45s linear infinite;
+  will-change: transform;
+}
+.pt-marquee-wrap:hover .pt-marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pt-marquee-track { animation: none; }
+}
+
+/* Edge fade for marquee — tighter on mobile so pills aren't half-hidden */
+.pt-marquee-fade {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 32px,
+    #000 calc(100% - 32px),
+    transparent 100%
+  );
+          mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 32px,
+    #000 calc(100% - 32px),
+    transparent 100%
+  );
+}
+@media (min-width: 768px) {
+  .pt-marquee-fade {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 80px,
+      #000 calc(100% - 80px),
+      transparent 100%
+    );
+            mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 80px,
+      #000 calc(100% - 80px),
+      transparent 100%
+    );
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Container query helper */
+@media (max-width: 768px) {
+  :root {
+    --pt-fade-distance: 20px;
+  }
 }
